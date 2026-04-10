@@ -1,0 +1,7 @@
+Структура проекта:
+    APIServer - 
+    Config - 
+    Router - объект, который принимает входящий http-запрос и вызывает соответствующий обработчик (handler)
+    Handler - 
+
+http.ListenAndServe(s.config.ServerPort, s.router) - непосредственно запуск сервера на выбранном порту. 
