@@ -1,11 +1,28 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"mifare/internal/service"
+
+	"github.com/gin-gonic/gin"
+)
 
 type Handler struct {
+	apiVersion string
+	services *service.Service
+}
+
+func NewHandler(apiVersion string, services *service.Service) *Handler {
+	return &Handler{
+		apiVersion: apiVersion,
+		services: services,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
+	// По умолчанию стоит Debug и в консоль выводятся все эндпоинты с их хендлерами
+	// При переходе в Release всё логирование прекращается
+	// gin.SetMode(gin.ReleaseMode)
+
 	router := gin.New()
 
 	auth := router.Group("/auth") 
@@ -14,7 +31,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-in", h.SignIn)
 	}
 
-	api := router.Group("/api/v1")
+	api := router.Group("/api/" + h.apiVersion)
 	{
 		users := api.Group("/users")
 		{
@@ -62,7 +79,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		}
 	}
 
-	terminal := router.Group("/api/v1/terminal")
+	terminal := router.Group("/api/" + h.apiVersion + "/terminal")
 	{
 		terminal.POST("/authorize", h.AuthorizeTransaction)
 		terminal.GET("/keys", h.GetAllKeys)

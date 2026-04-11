@@ -1,9 +1,8 @@
 package domain
 
 type Key struct {
-	ID          uint   `gorm:"primaryKey"`
-	KeyValue    string `gorm:"column:key_value;not null"`
-	KeyType     string `gorm:"column:key_type"`
-	Description string
-	Cards       []Card `gorm:"foreignKey:KeyID"`
+	ID          uint   `db:"id" json:"id"`
+	KeyValue    string `db:"key_value" json:"keyValue"`
+	KeyType     string `db:"key_type" json:"keyType"`
+	Description string `db:"description" json:"description"`
 }
