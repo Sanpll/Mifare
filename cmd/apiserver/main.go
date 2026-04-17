@@ -11,6 +11,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+// @title Mifare REST API
+// @version 1.0
+// @description API server for Mifare processing
+
+// @host localhost:8888
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description "Bearer {token}"
+
 func main() {
 	// считывание конфигов
 	if err := initConfig(); err != nil {

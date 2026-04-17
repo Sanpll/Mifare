@@ -1,3 +1,5 @@
+запуск проекта: powershell -ExecutionPolicy Bypass -File .\start.ps1
+
 Структура проекта (чистая архитектура):
     APIServer - 
     Config - 
@@ -5,3 +7,22 @@
     Handler - 
 
 http.ListenAndServe(s.config.ServerPort, s.router) - непосредственно запуск сервера на выбранном порту. 
+
+admin: admin123
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYwNzY1NjYsImlhdCI6MTc3NjA2OTM2NiwiaXNfYWRtaW4iOnRydWUsImlzcyI6Im1pZmFyZS1zZXJ2ZXIiLCJzdWIiOiIxIiwidXNlcl9pZCI6MSwidXNlcm5hbWUiOiJhZG1pbiJ9.Dkg7wAbhrv4F4hR-gbWyXyrlnZ3XJnoX7dW5l0NsVk4
+
+user: user1234
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYwNzg5MzUsImlhdCI6MTc3NjA3MTczNSwiaXNfYWRtaW4iOmZhbHNlLCJpc3MiOiJtaWZhcmUtc2VydmVyIiwic3ViIjoiMiIsInVzZXJfaWQiOjIsInVzZXJuYW1lIjoidXNlciJ9.U3shOpXtT0yHZ6fAuXOSynyO2JIA-1ISM5DyNpXK3gw
+
+user0: user01234
+token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYwODQ0MDMsImlhdCI6MTc3NjA3NzIwMywiaXNfYWRtaW4iOmZhbHNlLCJpc3MiOiJtaWZhcmUtc2VydmVyIiwic3ViIjoiNCIsInVzZXJfaWQiOjQsInVzZXJuYW1lIjoidXNlcjAifQ.IM5ibe-M1ExHVhgw54sw57v1INBQLVuiIBd2bGrXp4k
+
+Ключ - 12 шестнадцатеричных символов (6 байт), тип - "A" или "B". 
+В описании хранится информация для администрирования и определения за что отвечает ключ.
+
+Карта - в реальной карте хранится до 32 ключей в 16 секторах (16 "A" + 16 "B"), однако тут упрощено и используется только 1 ключ.
+Идентификатор карты обычно 8- или 14-значный (4 или 7 байт) и всегда хранится в незашифрованном виде.
+Ключ нужен для доступа к остальной информации на карте - баланс, имя владельца, заблокирована ли карта.
+
+Оплата проходит, если получилось расшифровать карту (действительные ключи), на карте достаточно средств и карта не заблокирована. 
+Если всё успешно, то баланс на карте уменьшается.

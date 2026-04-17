@@ -1,7 +1,25 @@
+# IDE
 .idea
-
 *.iml
+.vscode/
 
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Go build artifacts
+mifare
+/bin/
 *.exe
+*.test
+*.out
 
+# Database
 *.db
+
+# Сертификаты и приватные ключи
+certs/
+
+# Logs and temporary files
+*.log
+*.tmp
