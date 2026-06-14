@@ -1,4 +1,7 @@
-запуск проекта: powershell -ExecutionPolicy Bypass -File .\start.ps1
+запуск проекта: .\start.ps1
+
+для авторизации вписать такую строчку:
+Bearer jwt-token
 
 Структура проекта (чистая архитектура):
     APIServer - 
