@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/mifare ./cmd/apiserver
+RUN go build -o /bin/mifare ./cmd/apiserver
 
 FROM node:20-alpine AS frontend-builder
 WORKDIR /frontend
