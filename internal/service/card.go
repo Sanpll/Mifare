@@ -1,10 +1,14 @@
 package service
 
 import (
+	"database/sql"
+    "errors"
 	"fmt"
 	"mifare/internal/domain"
 	"mifare/internal/dto"
 	"mifare/internal/repository"
+
+	"github.com/shopspring/decimal"
 )
 
 type CardService struct {
@@ -19,7 +23,14 @@ func NewCardService(repo repository.Card, keyRepo repository.Key) *CardService {
 	}
 }
 
+var ErrCardNotFound = errors.New("card not found")
+
 func (s *CardService) Create(input dto.CreateCardInput, username string) (int, error) {
+	balance, err := decimal.NewFromString(input.Balance)
+	if err != nil {
+		return 0, fmt.Errorf("invalid balance format")
+	}
+
 	key, err := s.keyRepo.GetByValue(input.KeyValue)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get key_id by value: %w", err)
@@ -27,7 +38,7 @@ func (s *CardService) Create(input dto.CreateCardInput, username string) (int, e
 
 	card := domain.Card{
 		CardNumber: input.CardNumber,
-		Balance:    input.Balance,
+		Balance:    balance,
 		IsBlocked:  input.IsBlocked,
 		OwnerName:  username,
 		KeyID:      key.ID,
@@ -47,7 +58,7 @@ func (s *CardService) GetAll() ([]dto.CardResponse, error) {
 		dtoCards = append(dtoCards, dto.CardResponse{
 			ID:         c.ID,
 			CardNumber: c.CardNumber,
-			Balance:    c.Balance,
+			Balance:    c.Balance.String(),
 			IsBlocked:  c.IsBlocked,
 			OwnerName:  c.OwnerName,
 			KeyValue:   c.KeyValue,
@@ -66,20 +77,43 @@ func (s *CardService) GetById(id int) (dto.CardResponse, error) {
 	return dto.CardResponse{
 		ID:         card.ID,
 		CardNumber: card.CardNumber,
-		Balance:    card.Balance,
+		Balance:    card.Balance.String(),
 		IsBlocked:  card.IsBlocked,
 		OwnerName:  card.OwnerName,
 		KeyValue:   card.KeyValue,
 	}, nil
 }
 
+func (s *CardService) GetByNumber(cardNumber string) (dto.CardResponse, error) {
+    card, err := s.repo.GetByNumber(cardNumber)
+    if err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return dto.CardResponse{}, ErrCardNotFound
+        }
+        return dto.CardResponse{}, fmt.Errorf("failed to get card by number: %w", err)
+    }
+    return dto.CardResponse{
+        ID:         card.ID,
+        CardNumber: card.CardNumber,
+        Balance:    card.Balance.String(),
+        IsBlocked:  card.IsBlocked,
+        OwnerName:  card.OwnerName,
+        KeyValue:   card.KeyValue,
+    }, nil
+}
+
 func (s *CardService) Update(id int, input dto.CardUpdate) error {
+	balance, err := decimal.NewFromString(*input.Balance)
+	if err != nil {
+		return fmt.Errorf("invalid balance format")
+	}
+
 	card := domain.Card{}
 	balanceProvided := false
 	isBlockedProvided := false
 
 	if input.Balance != nil {
-		card.Balance = *input.Balance
+		card.Balance = balance
 		balanceProvided = true
 	}
 	if input.IsBlocked != nil {

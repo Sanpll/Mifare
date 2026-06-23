@@ -56,6 +56,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			cards.POST("/", h.CreateCard)
 			cards.GET("/", h.GetCards)
 			cards.GET("/:id", h.GetCardById)
+			cards.GET("/by-number", h.GetCardByNumber)
 			cards.PUT("/:id", h.UpdateCard)
 			cards.DELETE("/:id", h.DeleteCard)
 		}

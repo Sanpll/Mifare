@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o /bin/mifare ./cmd/apiserver
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/mifare ./cmd/apiserver
 
 FROM node:20-alpine AS frontend-builder
 WORKDIR /frontend
@@ -27,5 +27,5 @@ RUN chmod +x /app/mifare
 
 EXPOSE 8888
 
-# Запускаем Nginx, а Go-сервер запускается в фоне
+# Запуск Nginx и Go-серверв в фоне
 CMD ["sh", "-c", "./mifare & nginx -g 'daemon off;'"]

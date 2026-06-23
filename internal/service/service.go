@@ -23,6 +23,7 @@ type Card interface {
 	Create(input dto.CreateCardInput, username string) (int, error)
 	GetAll() ([]dto.CardResponse, error)
 	GetById(id int) (dto.CardResponse, error)
+	GetByNumber(cardNumber string) (dto.CardResponse, error)
 	Update(id int, input dto.CardUpdate) error
 	Delete(id int) error
 }

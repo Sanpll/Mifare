@@ -24,7 +24,15 @@ func NewTransactionService(repo repository.Transaction, cardRepo repository.Card
 }
 
 func (s *TransactionService) Authorize(input dto.AuthorizeTransactionInput) (dto.AuthorizeTransactionResponse, error) {
-	if input.Price.LessThan(decimal.Zero) {
+	price, err := decimal.NewFromString(input.Price)
+	if err != nil {
+		return dto.AuthorizeTransactionResponse{
+			Authorized: false,
+			Message: "incorrect price format",
+		}, nil
+	}
+
+	if price.LessThan(decimal.Zero) {
 		return dto.AuthorizeTransactionResponse{
 			Authorized: false,
 			Message: "incorrect price value",
@@ -46,7 +54,7 @@ func (s *TransactionService) Authorize(input dto.AuthorizeTransactionInput) (dto
 		}, nil
 	}
 
-	if card.Balance.LessThan(input.Price) {
+	if card.Balance.LessThan(price) {
 		return dto.AuthorizeTransactionResponse{
 			Authorized: false,
 			Message: "insufficient balance",
@@ -70,18 +78,23 @@ func (s *TransactionService) Authorize(input dto.AuthorizeTransactionInput) (dto
 }
 
 func (s *TransactionService) Create(input dto.CreateTransactionInput) (int, error) {
+	price, err := decimal.NewFromString(input.Price)
+	if err != nil {
+		return 0, fmt.Errorf("invalid price format")
+	}
+
 	card, err := s.cardRepo.GetByNumber(input.CardNumber)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get card_id by number: %w", err)
+		return 0, fmt.Errorf("failed to get card by card number: %w", err)
 	}
 
 	terminal, err := s.terminalRepo.GetBySerialNumber(input.TerminalSerialNumber)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get terminal_id by serial_number: %w", err)
+		return 0, fmt.Errorf("failed to get terminal by serial number: %w", err)
 	}
 
 	transaction := domain.Transaction{
-		Price:      input.Price,
+		Price:      price,
 		CardID:     card.ID,
 		TerminalID: terminal.ID,
 		Status:     input.Status,
@@ -111,7 +124,7 @@ func (s *TransactionService) GetAll() ([]dto.TransactionResponse, error) {
 		dtoTransactions = append(dtoTransactions, dto.TransactionResponse{
 			ID:                   t.ID,
 			CardNumber:           card.CardNumber,
-			Price:                t.Price,
+			Price:                t.Price.String(),
 			TerminalSerialNumber: terminal.SerialNumber,
 		})
 	}
@@ -138,7 +151,7 @@ func (s *TransactionService) GetById(id int) (dto.TransactionResponse, error) {
 	return dto.TransactionResponse{
 		ID:                   transaction.ID,
 		CardNumber:           card.CardNumber,
-		Price:                transaction.Price,
+		Price:                transaction.Price.String(),
 		TerminalSerialNumber: terminal.SerialNumber,
 	}, nil
 }
@@ -149,7 +162,7 @@ func (s *TransactionService) Update(id int, input dto.TransactionUpdate) error {
 	if input.CardNumber != nil {
 		card, err := s.cardRepo.GetByNumber(*input.CardNumber)
 		if err != nil {
-			return fmt.Errorf("failed to get card_id by number: %w", err)
+			return fmt.Errorf("failed to get card by card number: %w", err)
 		}
 
 		transaction.CardID = card.ID
@@ -160,7 +173,7 @@ func (s *TransactionService) Update(id int, input dto.TransactionUpdate) error {
 	if input.TerminalSerialNumber != nil {
 		terminal, err := s.terminalRepo.GetBySerialNumber(*input.TerminalSerialNumber)
 		if err != nil {
-			return fmt.Errorf("failed to get terminal_id by serial_number: %w", err)
+			return fmt.Errorf("failed to get terminal by serial number: %w", err)
 		}
 
 		transaction.TerminalID = terminal.ID

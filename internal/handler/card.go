@@ -1,7 +1,9 @@
 package handler
 
 import (
+    "errors"
 	"mifare/internal/dto"
+	"mifare/internal/service"
 	"net/http"
 	"strconv"
 	"strings"
@@ -98,6 +100,38 @@ func (h *Handler) GetCardById(c *gin.Context) {
 		OwnerName:  card.OwnerName,
 		KeyValue:   card.KeyValue,
 	})
+}
+
+// @Summary      Get card by number
+// @Tags         Cards
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        number   query     string  true  "card number"
+// @Success      200  {object}  dto.CardResponse
+// @Failure      400  {object}  handler.errorResponse
+// @Failure      401  {object}  handler.errorResponse
+// @Failure      404  {object}  handler.errorResponse
+// @Failure      500  {object}  handler.errorResponse
+// @Router       /api/v1/cards/by-number [get]
+func (h *Handler) GetCardByNumber(c *gin.Context) {
+    number := c.Query("number")
+    if number == "" {
+        newErrorResponse(c, http.StatusBadRequest, "card number is required")
+        return
+    }
+
+    card, err := h.services.Card.GetByNumber(number)
+    if err != nil {
+        if errors.Is(err, service.ErrCardNotFound) {
+            newErrorResponse(c, http.StatusNotFound, "card not found")
+            return
+        }
+        newErrorResponse(c, http.StatusInternalServerError, err.Error())
+        return
+    }
+
+    c.JSON(http.StatusOK, card)
 }
 
 // @Summary      Update card by ID
